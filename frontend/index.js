@@ -35,9 +35,10 @@ async function sprintChallenge5() {
       name.textContent = learner.fullName; // Set text content to learner's full name
       card.appendChild(name);
       
-      const email = document.createElement("p");
-      email.textContent = `Email: ${learner.email}`; // Set text content to learner's email
-      card.appendChild(email);
+      const emailDiv = document.createElement("div");
+      emailDiv.textContent = `Email: ${learner.email}`; // Set text content to learner's email within a div
+      card.appendChild(emailDiv);
+
 
       const mentorsEl = document.createElement("h4");
       mentorsEl.textContent = "Mentors";
