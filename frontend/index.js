@@ -14,42 +14,60 @@ async function sprintChallenge5() {
     const mentors = mentorsResponse.data; // Get mentors
 
     // Combining the data
-    const combinedData = learners.map((learner) => {
-      // Map over learners and return a new object. Needed because we need to combine data
-      return {
-        ...learner,
+    const combinedData = []; 
+    learners.forEach((learner) => {
+      // Utilize forEach over learners and return a new object. Needed because we need to combine data
+      const result = {
+        ...learner, // Taking existing learners & mapping mentors to search the list to match the ID to mentor itself
         mentors: learner.mentors.map((mentorId) => {
           const mentor = mentors.find((m) => m.id === mentorId); // Find mentor by ID
-          return mentor ? mentor.fullName : "Unknown"; // Return mentor name or 'Unknown'
+          return `${mentor.firstName} ${mentor.lastName}`; // Concatenating first name and last name
         }),
       };
+      combinedData.push(result); // Add the result to the combinedData array
     });
 
     // Clear info paragraph and render learner cards
-    combinedData.forEach((learner) => { // Loop over combined data so we can render cards
+    combinedData.forEach((learner) => { // Loop over combined data to render cards
       const card = document.createElement("div"); // Create a new card element for each learner
-      card.className = "card"; // Add a class to the card. Class is for styling
-      card.innerHTML = `
-        <h3> ${learner.fullName}</h3>
-        <p>Email: ${learner.email}</p> 
-        <ul>${learner.mentors.map((name) => <li>${name}</li>).join("")}</ul> // Populate mentors list with mentor names
-      `; // Populate card with learner info and mentors
-      cardsContainer.appendChild(card); // Append the card to the container
+      card.className = "card"; // Add a class to the card for styling
+      
+      const name = document.createElement("h3"); // Create element for learner's name
+      name.textContent = learner.fullName; // Set text content to learner's full name
+      card.appendChild(name); // Append name element to card
+
+      const email = document.createElement("p"); // Create element for learner's email
+      email.textContent = `Email: ${learner.email}`; // Set text content to learner's email
+      card.appendChild(email); // Append email element to card
+
+      const mentorsEl = document.createElement("h4"); // Create element for the "Mentors" label
+      mentorsEl.textContent = "Mentors"; // Set text content to "Mentors"
+      card.appendChild(mentorsEl); // Append mentors label to card
+      
+      const mentorList = document.createElement("ul"); // Create ul element for mentors list
+      learner.mentors.forEach(mentorName => {
+        const li = document.createElement("li"); // Create li element for each mentor
+        li.textContent = mentorName; // Set text content to mentor's name
+        mentorList.appendChild(li); // Append mentor item to mentors list
+      });
+      card.appendChild(mentorList); // Append mentors list to card
+
+      cardsContainer.appendChild(card); // Append the completed card to the cards container
 
       // Initially hide the mentors list
-      const mentorsList = card.querySelector('ul');
-      mentorsList.style.display = 'none'; // Hide mentors list
-
+      mentorList.style.display = 'none'; // Hide mentors list initially
+      
       // Add click event listener to each card for selection
       card.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent the event from bubbling to the document
-        // Deselect all other cards
+        // Toggle the 'selected' class on the clicked card
         document.querySelectorAll('.card').forEach(c => {
           c.classList.remove('selected');
-          c.querySelector('ul').style.display = 'none'; // Hide mentors list in other cards
+          c.querySelector('ul').style.display = 'none'; // Ensure mentors list is hidden in all cards
         });
         card.classList.toggle('selected'); // Toggle the 'selected' class on the clicked card
-        mentorsList.style.display = mentorsList.style.display === 'none' ? '' : 'none'; // Toggle display of mentors list
+        mentorList.style.display = card.classList.contains('selected') ? '' : 'none'; // Show or hide the mentors list based on selection
+        
         // Update info paragraph based on selection
         infoParagraph.textContent = card.classList.contains('selected') ?
           `The selected learner is ${learner.fullName}` : "No learner is selected";
@@ -60,7 +78,7 @@ async function sprintChallenge5() {
     document.addEventListener('click', () => {
       document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
       document.querySelectorAll('.card ul').forEach(ul => ul.style.display = 'none'); // Hide all mentors lists
-      infoParagraph.textContent = "No learner is selected"; // Reset info paragraph
+      infoParagraph.textContent = "No learner is selected"; // Reset info paragraph to initial state
     });
 
   } catch (error) { // Catch any errors that occur during fetching
@@ -68,12 +86,7 @@ async function sprintChallenge5() {
     infoParagraph.textContent = "Failed to fetch learner cards."; // Notify user of error
   }
 
-  // Updated footer NO ISSUE
-  const footer = document.querySelector("footer");
-  const currentYear = new Date().getFullYear();
-  footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${currentYear}`;
-
-  // 👆 WORK WORK ABOVE THIS LINE 👆
+  // 👆 WORK WORK ABOVE THIS LINE
 }
 
 
@@ -81,3 +94,5 @@ async function sprintChallenge5() {
 if (typeof module !== "undefined" && module.exports)
   module.exports = { sprintChallenge5 };
 else sprintChallenge5();
+
+
