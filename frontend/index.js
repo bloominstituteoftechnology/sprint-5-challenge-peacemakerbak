@@ -14,80 +14,86 @@ async function sprintChallenge5() {
     const mentors = mentorsResponse.data; // Get mentors
 
     // Combining the data
-    const combinedData = []; 
+    const combinedData = [];
     learners.forEach((learner) => {
       // Utilize forEach over learners and return a new object. Needed because we need to combine data
       const result = {
         ...learner, // Taking existing learners & mapping mentors to search the list to match the ID to mentor itself
         mentors: learner.mentors.map((mentorId) => {
           const mentor = mentors.find((m) => m.id === mentorId); // Find mentor by ID
-          return `${mentor.firstName} ${mentor.lastName}`; // Concatenating first name and last name
+          return mentor ? `${mentor.firstName} ${mentor.lastName}` : "Unknown"; // Concatenating first name and last name, handling potential undefined mentor
         }),
       };
       combinedData.push(result); // Add the result to the combinedData array
     });
 
-    // Clear info paragraph and render learner cards
     combinedData.forEach((learner) => { // Loop over combined data to render cards
-      const card = document.createElement("div"); // Create a new card element for each learner
-      card.className = "card"; // Add a class to the card for styling
+      const card = document.createElement("div");
+      card.className = "card"; // Ensure card has only the 'card' class for styling
       
-      const name = document.createElement("h3"); // Create element for learner's name
+      const name = document.createElement("h3");
       name.textContent = learner.fullName; // Set text content to learner's full name
-      card.appendChild(name); // Append name element to card
-
-      const email = document.createElement("p"); // Create element for learner's email
+      card.appendChild(name);
+      
+      const email = document.createElement("p");
       email.textContent = `Email: ${learner.email}`; // Set text content to learner's email
-      card.appendChild(email); // Append email element to card
+      card.appendChild(email);
 
-      const mentorsEl = document.createElement("h4"); // Create element for the "Mentors" label
-      mentorsEl.textContent = "Mentors"; // Set text content to "Mentors"
-      card.appendChild(mentorsEl); // Append mentors label to card
+      const mentorsEl = document.createElement("h4");
+      mentorsEl.textContent = "Mentors";
+      card.appendChild(mentorsEl);
       
-      const mentorList = document.createElement("ul"); // Create ul element for mentors list
+      const mentorList = document.createElement("ul");
+      mentorList.style.display = 'none'; // Ensure mentors list is hidden on page load
       learner.mentors.forEach(mentorName => {
-        const li = document.createElement("li"); // Create li element for each mentor
-        li.textContent = mentorName; // Set text content to mentor's name
-        mentorList.appendChild(li); // Append mentor item to mentors list
+        const li = document.createElement("li");
+        li.textContent = mentorName;
+        mentorList.appendChild(li);
       });
-      card.appendChild(mentorList); // Append mentors list to card
-
-      cardsContainer.appendChild(card); // Append the completed card to the cards container
-
-      // Initially hide the mentors list
-      mentorList.style.display = 'none'; // Hide mentors list initially
+      card.appendChild(mentorList); // Append mentors list to the card
       
-      // Add click event listener to each card for selection
-      card.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent the event from bubbling to the document
-        // Toggle the 'selected' class on the clicked card
+      // Append the completed card to the cards container
+      cardsContainer.appendChild(card);
+      
+      // Add click event listener to each card for interactivity
+      card.addEventListener('click', function(e) {
+        // Prevent the event from bubbling to the document
+        e.stopPropagation();
+        // Toggle the 'selected' class on the clicked card and update the mentors list display
+        const isSelected = card.classList.contains('selected');
         document.querySelectorAll('.card').forEach(c => {
           c.classList.remove('selected');
           c.querySelector('ul').style.display = 'none'; // Ensure mentors list is hidden in all cards
         });
-        card.classList.toggle('selected'); // Toggle the 'selected' class on the clicked card
-        mentorList.style.display = card.classList.contains('selected') ? '' : 'none'; // Show or hide the mentors list based on selection
-        
-        // Update info paragraph based on selection
-        infoParagraph.textContent = card.classList.contains('selected') ?
-          `The selected learner is ${learner.fullName}` : "No learner is selected";
+        if (!isSelected) {
+          card.classList.add('selected');
+          mentorList.style.display = '';
+          infoParagraph.textContent = `The selected learner is ${learner.fullName}`;
+        } else {
+          infoParagraph.textContent = "No learner is selected";
+        }
       });
     });
 
-    // Reset selection and info paragraph when clicking outside cards
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
-      document.querySelectorAll('.card ul').forEach(ul => ul.style.display = 'none'); // Hide all mentors lists
-      infoParagraph.textContent = "No learner is selected"; // Reset info paragraph to initial state
-    });
+    // Update footer text to match the test requirement
+    const footer = document.querySelector("footer");
+    footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${new Date().getFullYear()}`;
 
-  } catch (error) { // Catch any errors that occur during fetching
+  } catch (error) {
     console.error("Failed to fetch data:", error);
     infoParagraph.textContent = "Failed to fetch learner cards."; // Notify user of error
   }
 
-  // 👆 WORK WORK ABOVE THIS LINE
+  // Reset selection and info paragraph when clicking outside cards
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.card ul').forEach(ul => ul.style.display = 'none'); // Hide all mentors lists
+    infoParagraph.textContent = "No learner is selected"; // Reset info paragraph to initial state
+  });
+
+  // 👆 WORK WORK ABOVE THIS LINE 👆
 }
+
 
 
 // ❗ DO NOT CHANGE THE CODE  BELOW
