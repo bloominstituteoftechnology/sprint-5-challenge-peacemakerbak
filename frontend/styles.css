@@ -94,6 +94,7 @@ section {
   content: '▼ ';
 }
 
+
 .card.selected h4.closed::before,
 .card.selected h4.open::before {
   color: #00808c;

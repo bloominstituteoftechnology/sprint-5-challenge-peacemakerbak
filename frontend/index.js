@@ -10,90 +10,85 @@ async function sprintChallenge5() {
     // Try to fetch data. Needed to catch errors
     const learnersResponse = await axios.get("http://localhost:3003/api/learners"); // Fetch learners
     const mentorsResponse = await axios.get("http://localhost:3003/api/mentors"); // Fetch mentors
-    const learners = learnersResponse.data; // Get learners
-    const mentors = mentorsResponse.data; // Get mentors
+    const learners = learnersResponse.data; // Get learners data from response
+    const mentors = mentorsResponse.data; // Get mentors data from response
 
     // Combining the data
     const combinedData = [];
     learners.forEach((learner) => {
-      // Utilize forEach over learners and return a new object. Needed because we need to combine data
       const result = {
-        ...learner, // Taking existing learners & mapping mentors to search the list to match the ID to mentor itself
+        ...learner, // Taking existing learners & mapping mentors
         mentors: learner.mentors.map((mentorId) => {
           const mentor = mentors.find((m) => m.id === mentorId); // Find mentor by ID
-          return mentor ? `${mentor.firstName} ${mentor.lastName}` : "Unknown"; // Concatenating first name and last name, handling potential undefined mentor
+          return mentor ? `${mentor.firstName} ${mentor.lastName}` : "Unknown"; // Concatenate names
         }),
       };
-      combinedData.push(result); // Add the result to the combinedData array
+      combinedData.push(result);
     });
 
-    combinedData.forEach((learner) => { // Loop over combined data to render cards
+    combinedData.forEach((learner) => {
       const card = document.createElement("div");
-      card.className = "card"; // Ensure card has only the 'card' class for styling
+      card.className = "card"; // Style the card
       
       const name = document.createElement("h3");
-      name.textContent = learner.fullName; // Set text content to learner's full name
+      name.textContent = learner.fullName;
       card.appendChild(name);
       
       const emailDiv = document.createElement("div");
-      emailDiv.textContent = `Email: ${learner.email}`; // Set text content to learner's email within a div
+      emailDiv.textContent = `Email: ${learner.email}`;
       card.appendChild(emailDiv);
-
 
       const mentorsEl = document.createElement("h4");
       mentorsEl.textContent = "Mentors";
+      mentorsEl.classList.add("closed"); // Start as closed
       card.appendChild(mentorsEl);
       
       const mentorList = document.createElement("ul");
-      mentorList.style.display = 'none'; // Ensure mentors list is hidden on page load
+      mentorList.classList.add("closed"); // Mentors list hidden on page load
       learner.mentors.forEach(mentorName => {
         const li = document.createElement("li");
         li.textContent = mentorName;
         mentorList.appendChild(li);
       });
-      card.appendChild(mentorList); // Append mentors list to the card
-      
-      // Append the completed card to the cards container
+      card.appendChild(mentorList);
+
       cardsContainer.appendChild(card);
-      
-      // Add click event listener to each card for interactivity
-      card.addEventListener('click', function(e) {
-        // Prevent the event from bubbling to the document
-        e.stopPropagation();
-        // Toggle the 'selected' class on the clicked card and update the mentors list display
-        const isSelected = card.classList.contains('selected');
-        document.querySelectorAll('.card').forEach(c => {
-          c.classList.remove('selected');
-          c.querySelector('ul').style.display = 'none'; // Ensure mentors list is hidden in all cards
+
+      // Toggle mentors list on h4 click
+      mentorsEl.addEventListener('click', (e) => {
+        e.stopPropagation(); // Stop event from bubbling
+        mentorList.classList.toggle("closed");
+        mentorsEl.classList.toggle("open");
+      });
+
+      // Card click event for selection
+      card.addEventListener('click', (e) => {
+        e.stopPropagation(); // Stop event from bubbling to document
+        const isSelected = card.classList.toggle('selected');
+        document.querySelectorAll('.card.selected').forEach(c => {
+          if (c !== card) c.classList.remove('selected');
         });
-        if (!isSelected) {
-          card.classList.add('selected');
-          mentorList.style.display = '';
-          infoParagraph.textContent = `The selected learner is ${learner.fullName}`;
-        } else {
-          infoParagraph.textContent = "No learner is selected";
-        }
+        mentorList.style.display = isSelected ? '' : 'none'; // Toggle display of mentors list
+        infoParagraph.textContent = isSelected ? `The selected learner is ${learner.fullName}` : "No learner is selected";
       });
     });
 
-    // Update footer text to match the test requirement
+    // Clicking outside the cards
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.card ul').forEach(ul => ul.style.display = 'none'); // Hide mentors lists
+      infoParagraph.textContent = "No learner is selected";
+    });
+
     const footer = document.querySelector("footer");
     footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${new Date().getFullYear()}`;
-
   } catch (error) {
     console.error("Failed to fetch data:", error);
-    infoParagraph.textContent = "Failed to fetch learner cards."; // Notify user of error
+    infoParagraph.textContent = "Failed to fetch learner cards.";
   }
-
-  // Reset selection and info paragraph when clicking outside cards
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
-    document.querySelectorAll('.card ul').forEach(ul => ul.style.display = 'none'); // Hide all mentors lists
-    infoParagraph.textContent = "No learner is selected"; // Reset info paragraph to initial state
-  });
-
-  // 👆 WORK WORK ABOVE THIS LINE 👆
 }
+
+
 
 
 
